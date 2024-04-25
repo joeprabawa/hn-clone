@@ -1,0 +1,3 @@
+#comment-block  ::ng-deep pre {
+    @apply text-wrap
+}

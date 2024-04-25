@@ -1,0 +1,18 @@
+<div
+  [@slideUpDown]="animationState"
+  id="snackbar-content"
+  class="flex min-h-14 items-center gap-3 rounded-md px-3 py-4 text-sm"
+  [class]="snackBarModeClass">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke-width="1.5"
+    stroke="currentColor"
+    class="h-6 w-6 flex-1">
+    <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="iconMode" />
+  </svg>
+  <p class="max-w-[280px] text-xs">
+    {{ message }}
+  </p>
+</div>

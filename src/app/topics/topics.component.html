@@ -1,0 +1,265 @@
+<ng-container *ngIf="{ topicLists: topicLists$ | async, loaders: loaders$ | async } as vm">
+  <div class="flex h-[calc(100vh_-_80px)] items-center justify-center" *ngIf="vm.loaders?.getTopics?.isLoading">
+    <svg
+      class="-ml-1 mr-3 h-8 w-8 animate-spin text-orange-400"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path
+        class="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    <span class="font-sans font-medium text-slate-600">Load topics...</span>
+  </div>
+  <ng-container *ngIf="!vm.loaders?.getTopics?.isLoading">
+    <div class="flex flex-col gap-4 p-8">
+      <!-- First group -->
+      <div class="grid gap-4 lg:grid-cols-2">
+        <ng-container *ngFor="let item of vm.topicLists?.first">
+          <ng-container [ngTemplateOutlet]="cardTpl" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+        </ng-container>
+      </div>
+      <!-- Second group -->
+      <div class="flex flex-col divide-y overflow-hidden rounded-md shadow-md">
+        <ng-container
+          [ngTemplateOutlet]="listTpl"
+          [ngTemplateOutletContext]="{ $implicit: vm.topicLists?.second }"></ng-container>
+      </div>
+      <!-- Third  -->
+      <div class="grid gap-4 lg:grid-cols-2">
+        <ng-container *ngFor="let item of vm.topicLists?.third">
+          <ng-container [ngTemplateOutlet]="cardTpl" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+        </ng-container>
+      </div>
+      <!-- Fourth  -->
+      <div class="flex flex-col divide-y overflow-hidden rounded-md shadow-md">
+        <ng-container
+          [ngTemplateOutlet]="listTpl"
+          [ngTemplateOutletContext]="{ $implicit: vm.topicLists?.fourth }"></ng-container>
+      </div>
+      <!-- Fifth  -->
+      <div class="grid gap-4 lg:grid-cols-2">
+        <ng-container *ngFor="let item of vm.topicLists?.fifth">
+          <ng-container [ngTemplateOutlet]="cardTpl" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+        </ng-container>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Card Template -->
+  <ng-template #cardTpl let-item>
+    <div class="flex min-h-[150px] flex-col flex-wrap gap-3 rounded-md bg-white p-4 shadow-md">
+      <h3 class="h-[30px] flex-1 font-semibold">{{ item.title }}</h3>
+      <p class="border-b py-3 text-xs text-slate-400">
+        {{ item.score }} points by {{ item.by }} <span class="mx-3">|</span> codeberg.org
+      </p>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center justify-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="h-4 w-4 text-slate-400">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+          <span class="text-xs text-slate-400">{{ item.time | unixTimeToRelativeFormat }} ago</span>
+        </div>
+        <button
+          id="btn-comment"
+          [disabled]="!item.kids?.length || vm.loaders?.getComments?.[item.id]?.isLoading || vm.loaders?.getComments?.isLoading"
+          class="group flex items-center justify-center gap-3 rounded-md bg-orange-100 px-3 py-2 text-xs font-semibold text-orange-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+          (click)="openComment(item, item.kids)">
+          <svg
+            *ngIf="vm.loaders?.getComments?.[item.id]?.isLoading"
+            class="absolute h-4 w-4 animate-spin text-orange-400"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span class="flex gap-3" [class.invisible]="vm.loaders?.getComments?.[item.id]?.isLoading">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="h-4 w-4 text-orange-600 group-disabled:text-slate-400">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+            </svg>
+            {{ item.kids?.length }} Comment
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="h-4 w-4 stroke-2 text-orange-600 group-disabled:text-slate-400">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- List Template -->
+  <ng-template #listTpl let-items>
+    <ul class="divide-y">
+      <ng-container *ngFor="let item of items">
+        <li class="flex min-h-[80px] flex-col flex-wrap bg-white p-3 md:flex-row lg:flex-row">
+          <div class="flex flex-1 flex-col justify-center">
+            <h3 class="font-semibold">{{ item.title }}</h3>
+            <p class="flex flex-wrap items-center py-2 text-xs text-slate-400">
+              {{ item.score }} points by {{ item.by }} <span class="mx-2">|</span> codeberg.org
+              <span class="mx-2 hidden md:block">|</span>
+              <span class="hidden md:flex">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="mr-2 h-4 w-4 text-slate-400">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                {{ item.time | unixTimeToRelativeFormat }} ago
+              </span>
+            </p>
+          </div>
+          <div class="mt-2 flex justify-between md:mt-0 md:self-center">
+            <span class="flex items-center text-xs text-slate-400 md:hidden">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="mr-2 h-4 w-4 text-slate-400">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+              {{ item.time | unixTimeToRelativeFormat }} ago
+            </span>
+            <button
+              id="btn-comment"
+              [disabled]="!item.kids?.length || vm.loaders?.getComments?.[item.id]?.isLoading || vm.loaders?.getComments?.isLoading"
+              class="group flex items-center justify-center gap-3 rounded-md bg-orange-100 px-3 py-2 text-xs font-semibold text-orange-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+              (click)="openComment(item, item.kids)">
+              <svg
+                *ngIf="vm.loaders?.getComments?.[item.id]?.isLoading"
+                class="absolute h-4 w-4 animate-spin text-orange-400"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="flex gap-3" [class.invisible]="vm.loaders?.getComments?.[item.id]?.isLoading">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="h-4 w-4 text-orange-600 group-disabled:text-slate-400">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+                </svg>
+                {{ item.kids?.length }} Comment
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="h-4 w-4 stroke-2 text-orange-600 group-disabled:text-slate-400">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </li>
+      </ng-container>
+    </ul>
+  </ng-template>
+</ng-container>
+
+<!-- Comments Modal Tpl -->
+<ng-template #commentsTpl let-data>
+  <div class="relative flex max-h-[700px] flex-col p-8">
+    <button (click)="dialogRef?.close()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="absolute right-1 top-1 h-6 w-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <div id="modal-header" class="mb-3 flex flex-col">
+      <h3 class="font-semibold">{{ data.topic?.title }}</h3>
+      <div class="flex items-center justify-between border-b">
+        <p class="flex items-center py-2 text-xs text-slate-400">
+          {{ data.topic?.score }} points by {{ data.topic?.by }} <span class="mx-2">|</span> codeberg.org
+          <span class="mx-2">|</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="mr-2 h-4 w-4 text-slate-400">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+          {{ data.topic?.time | unixTimeToRelativeFormat }} ago
+        </p>
+
+        <p class="flex items-center text-xs">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="mr-2 h-4 w-4">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+          </svg>
+          {{ data.topic?.kids?.length }} Comment
+        </p>
+      </div>
+    </div>
+    <div id="modal-content" class="flex flex-col gap-2 overflow-y-scroll py-2">
+      <div id="comment-section" class="flex flex-col" *ngFor="let comment of data.comments">
+        <div id="comment-block" class="rounded-md bg-slate-100 p-4" [innerHTML]="comment.text"></div>
+        <p class="ml-2 mt-2 text-xs">{{ comment.time | unixTimeToRelativeFormat }} ago</p>
+      </div>
+    </div>
+  </div>
+</ng-template>
