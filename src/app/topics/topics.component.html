@@ -257,7 +257,7 @@
     </div>
     <div id="modal-content" class="flex flex-col gap-2 overflow-y-scroll py-2">
       <div id="comment-section" class="flex flex-col" *ngFor="let comment of data.comments">
-        <div id="comment-block" class="rounded-md bg-slate-100 p-4" [innerHTML]="comment.text"></div>
+        <div id="comment-block" class="comment-block rounded-md bg-slate-100 p-4" [innerHTML]="comment.text"></div>
         <p class="ml-2 mt-2 text-xs">{{ comment.time | unixTimeToRelativeFormat }} ago</p>
       </div>
     </div>
